@@ -1,0 +1,189 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #1E90FF 100%);
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* Game Container */
+#gameContainer {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #1E90FF 100%);
+}
+
+/* Canvas */
+#gameCanvas {
+    display: block;
+    background: transparent;
+}
+
+/* UI Text Base Style */
+.ui-text {
+    position: absolute;
+    color: white;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    z-index: 10;
+}
+
+/* Score Display */
+#score {
+    top: 20px;
+    left: 20px;
+    font-size: 24px;
+}
+
+/* Game Title */
+#title {
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+}
+
+/* Timer Display */
+#timer {
+    bottom: 20px;
+    left: 20px;
+    font-size: 20px;
+    background: #4CAF50;
+    padding: 8px 16px;
+    border-radius: 5px;
+}
+
+/* Instructions */
+#instructions {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    font-size: 18px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    z-index: 5;
+}
+
+#instructions div {
+    margin-bottom: 10px;
+}
+
+/* Game Over Screen */
+#gameOver {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    display: none;
+    z-index: 20;
+    min-width: 250px;
+}
+
+#gameOver h2 {
+    margin-bottom: 15px;
+    font-size: 28px;
+}
+
+#gameOver p {
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+#gameOver button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+#gameOver button:hover {
+    background: #45a049;
+}
+
+#gameOver button:active {
+    transform: scale(0.98);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .ui-text {
+        font-size: 18px;
+    }
+    
+    #score {
+        font-size: 20px;
+    }
+    
+    #title {
+        font-size: 20px;
+    }
+    
+    #timer {
+        font-size: 16px;
+        padding: 6px 12px;
+    }
+    
+    #instructions {
+        font-size: 16px;
+    }
+    
+    #gameOver {
+        padding: 20px;
+        margin: 20px;
+    }
+    
+    #gameOver h2 {
+        font-size: 24px;
+    }
+    
+    #gameOver p {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ui-text {
+        font-size: 16px;
+    }
+    
+    #score {
+        font-size: 18px;
+        top: 10px;
+        left: 10px;
+    }
+    
+    #title {
+        font-size: 18px;
+        top: 10px;
+        right: 10px;
+    }
+    
+    #timer {
+        font-size: 14px;
+        padding: 4px 8px;
+        bottom: 10px;
+        left: 10px;
+    }
+    
+    #instructions {
+        font-size: 14px;
+    }
+}
