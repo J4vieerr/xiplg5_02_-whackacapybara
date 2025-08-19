@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky Hop Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <!-- UI Elements -->
+        <div id="score" class="ui-text">Score: 0</div>
+        <div id="title" class="ui-text">Sky Hop</div>
+        <div id="timer" class="ui-text">Time</div>
+        
+        <!-- Instructions -->
+        <div id="instructions">
+            <div>Use ARROW KEYS or WASD to move</div>
+            <div>SPACE to jump and swim</div>
+            <div>Help the cute shark collect coins!</div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOver">
+            <h2>Game Over!</h2>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
