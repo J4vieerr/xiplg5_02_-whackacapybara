@@ -3,31 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sky Hop Game</title>
+    <title>Cute Capybara Whack-a-Mole</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
-        
-        <!-- UI Elements -->
-        <div id="score" class="ui-text">Score: 0</div>
-        <div id="title" class="ui-text">Sky Hop</div>
-        <div id="timer" class="ui-text">Time</div>
-        
-        <!-- Instructions -->
-        <div id="instructions">
-            <div>Use ARROW KEYS or WASD to move</div>
-            <div>SPACE to jump and swim</div>
-            <div>Help the cute shark collect coins!</div>
-        </div>
+    <!-- Home Page Section: This is the starting page with game title, start button, and leaderboard -->
+    <div id="home-page" class="page">
+        <h1>Cute Capybara Whack-a-Mole!</h1>
+        <p>Whack the capybaras to score points, but avoid the bombs or it's game over!</p>
+        <button id="start-button">Start Game</button>
+        <h2>Leaderboard</h2>
+        <ul id="leaderboard"></ul>
+    </div>
 
-        <!-- Game Over Screen -->
-        <div id="gameOver">
-            <h2>Game Over!</h2>
-            <p>Final Score: <span id="finalScore">0</span></p>
-            <button onclick="restartGame()">Play Again</button>
+    <!-- Game Page Section: This is where the actual game happens, hidden initially -->
+    <div id="game-page" class="page" style="display: none;">
+        <h1>Hit the Capybaras!!</h1>
+        <p>Score: <span id="score">0</span></p>
+        <div id="game-grid" class="grid">
+            <!-- Grid of holes: 3x3 grid for simplicity. Each hole is a div that can show an image -->
+            <div class="hole"></div>
+            <div class="hole"></div>
+            <div class="hole"></div>
+            <div class="hole"></div>
+            <div class="hole"></div>
+            <div class="hole"></div>
+            <div class="hole"></div>
+            <div class="hole"></div>
+            <div class="hole"></div>
         </div>
+        <button id="restart-button" style="display: none;">Back to Home</button>
     </div>
 
     <script src="script.js"></script>
