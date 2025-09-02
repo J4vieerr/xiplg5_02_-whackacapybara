@@ -1,40 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cute Capybara Whack-a-Mole</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Whack a Capybara</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Home Page Section: This is the starting page with game title, start button, and leaderboard -->
-    <div id="home-page" class="page">
-        <h1>Cute Capybara Whack-a-Mole!</h1>
-        <p>Whack the capybaras to score points, but avoid the bombs or game over!</p>
-        <button id="start-button">Start Game</button>
-        <h2>Leaderboard</h2>
-        <ul id="leaderboard"></ul>
+  <div class="container">
+    <!-- HOME PAGE -->
+    <div id="home" class="page active">
+      <h1>🐹 Whack a Capybara 🐹</h1>
+      <div class="player-info" id="playerInfo">
+        <div>Selamat datang, <strong id="playerName">Pemain</strong>!</div>
+        <div>Skor Tertinggi: <strong id="highScore">0</strong></div>
+      </div>
+      <button class="btn" onclick="startGame()">🎮 Mulai Main</button>
+      <button class="btn btn-secondary" onclick="showLeaderboard()">🏆 Leaderboard</button>
+      <button class="btn btn-success" onclick="showSettings()">⚙️ Pengaturan</button>
     </div>
 
-    <!-- Game Page Section: This is where the actual game happens, hidden initially -->
-    <div id="game-page" class="page" style="display: none;">
-        <h1>Hit the Capybaras!!</h1>
-        <p>Score: <span id="score">0</span></p>
-        <div id="game-grid" class="grid">
-            <!-- Grid of holes: 3x3 grid for simplicity. Each hole is a div that can show an image -->
-            <div class="hole"></div>
-            <div class="hole"></div>
-            <div class="hole"></div>
-            <div class="hole"></div>
-            <div class="hole"></div>
-            <div class="hole"></div>
-            <div class="hole"></div>
-            <div class="hole"></div>
-            <div class="hole"></div>
+    <!-- GAME AREA -->
+    <div id="game" class="page">
+      <h1>Whack a Capybara</h1>
+      <div id="info">
+        <div class="info-item">Skor: <span id="score">0</span></div>
+        <div class="info-item">Waktu: <span id="time">30</span>s</div>
+        <div class="info-item">Level: <span id="level">1</span></div>
+      </div>
+      <div id="grid"></div>
+      <button class="btn" onclick="pauseGame()" id="pauseBtn">⏸️ Pause</button>
+      <button class="btn btn-secondary" onclick="endGame()">🏁 Selesai</button>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div id="leaderboard" class="page">
+      <h1>🏆 Leaderboard 🏆</h1>
+      <ul class="score-list" id="scoreList"></ul>
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-danger" onclick="clearLeaderboardConfirm()">🗑️ Hapus Semua</button>
+        <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali</button>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="settings" class="page">
+      <h1>⚙️ Pengaturan</h1>
+      <div class="settings-grid">
+        <div class="setting-item">
+          <label class="setting-label">Nama Pemain:</label>
+          <input type="text" class="setting-control" id="playerNameInput" placeholder="Masukkan nama Anda">
         </div>
-        <button id="restart-button" style="display: none;">Back to Home</button>
-    </div>
+        
+        <div class="setting-item">
+          <label class="setting-label">Pilih Gambar Capybara:</label>
+          <div class="preset-images">
+            <div class="preset-btn active" onclick="selectPresetImage('capybara1')" data-image="capybara1">
+              <img src="bakpao capybara.png" alt="Capybara 1">
+            </div>
+            <div class="preset-btn" onclick="selectPresetImage('capybara2')" data-image="capybara2">
+              <img src="Hi capybara.png" alt="Capybara 2">
+            </div>
+            <div class="preset-btn" onclick="selectPresetImage('capybara3')" data-image="capybara3">
+              <img src="sleep capybara.png" alt="Capybara 3">
+            </div>
+            <div class="preset-btn" onclick="selectPresetImage('capybara4')" data-image="capybara4">
+              <img src="streching capybara.png" alt="Capybara 4">
+            </div>
+          </div>
+        </div>
 
-    <script src="script.js"></script>
+        <div class="setting-item">
+          <label class="setting-label">Durasi Game (detik):</label>
+          <input type="range" class="setting-control" id="gameDuration" min="15" max="60" value="30">
+          <div>Nilai: <span id="durationValue">30</span> detik</div>
+        </div>
+        
+        <div class="setting-item">
+          <label class="setting-label">Tingkat Kesulitan:</label>
+          <select class="setting-control" id="difficulty">
+            <option value="easy">Mudah (2 detik)</option>
+            <option value="medium" selected>Sedang (1.5 detik)</option>
+            <option value="hard">Sulit (1 detik)</option>
+          </select>
+        </div>
+        
+        <div class="setting-item">
+          <label class="setting-label">Suara:</label>
+          <select class="setting-control" id="soundSetting">
+            <option value="on" selected>Hidup</option>
+            <option value="off">Mati</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-success" onclick="saveSettings()">💾 Simpan</button>
+      <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali</button>
+    </div>
+  </div>
+
+  <!-- POPUPS -->
+  <div id="successPopup" class="popup">
+    <div class="popup-content">
+      <div class="popup-icon">✅</div>
+      <div class="popup-message">Pengaturan Tersimpan!</div>
+      <div class="popup-submessage">Data Anda telah berhasil disimpan</div>
+    </div>
+  </div>
+
+  <div id="confirmPopup" class="popup">
+    <div class="popup-content confirm">
+      <div class="popup-icon">⚠️</div>
+      <div class="popup-message">Konfirmasi Hapus</div>
+      <div class="popup-submessage">Yakin ingin menghapus semua skor di leaderboard?</div>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button class="btn btn-danger" onclick="confirmClearLeaderboard()">Ya, Hapus</button>
+        <button class="btn btn-secondary" onclick="hideConfirmPopup()">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteSuccessPopup" class="popup">
+    <div class="popup-content success">
+      <div class="popup-icon">🗑️</div>
+      <div class="popup-message">Berhasil Dihapus!</div>
+      <div class="popup-submessage">Leaderboard telah dikosongkan</div>
+    </div>
+  </div>
+
+  <audio id="hitSound" src="hit.mp3" preload="auto"></audio>
+  <audio id="bombSound" src="bomb.mp3" preload="auto"></audio>
+
+  <script src="script.js"></script>
 </body>
 </html>
