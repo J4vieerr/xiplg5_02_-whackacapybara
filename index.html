@@ -37,6 +37,10 @@
     <div id="leaderboard" class="page">
       <h1>🏆 Leaderboard 🏆</h1>
       <ul class="score-list" id="scoreList"></ul>
+    
+      <h2>📜 Riwayat 10 Permainan Terakhir</h2>
+      <ul class="score-list" id="historyList"></ul>
+    
       <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
         <button class="btn btn-danger" onclick="clearLeaderboardConfirm()">🗑️ Hapus Semua</button>
         <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali</button>
@@ -94,6 +98,7 @@
         </div>
       </div>
       <button class="btn btn-success" onclick="saveSettings()">💾 Simpan</button>
+      <button class="btn btn-danger" onclick="resetSettings()">♻️ Reset Pengaturan</button>
       <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali</button>
     </div>
   </div>

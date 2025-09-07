@@ -1,22 +1,25 @@
 // Game Variables
-let score = 0, timeLeft = 30, timer, moleTimer, gameRunning = false;
-let level = 1, gamePaused = false;
-
-let gameSettings = {
-  playerName: 'Pemain',
-  gameDuration: 30,
-  difficulty: 'medium',
-  soundEnabled: true,
-  capybaraImage: 'capybara1'
-};
+function resetSettings() {
+  localStorage.removeItem('capybaraSettings');
+  gameSettings = {
+    playerName: 'Pemain',
+    gameDuration: 30,
+    difficulty: 'medium',
+    soundEnabled: true,
+    capybaraImage: 'capybara1'
+  };
+  saveSettings();
+  alert("Pengaturan berhasil direset!");
+  showHome();
+}
 
 // Capybara Images (pakai PNG kamu)
 
 const capybaraImages = {
-  capybara1: "bakpao capybara.png",
-  capybara2: "Hi capybara.png",
-  capybara3: "sleep capybara.png",
-  capybara4: "streching capybara.png"
+  capybara1: "bakpao_capybara.png",
+  capybara2: "hi_capybara.png",
+  capybara3: "sleep_capybara.png",
+  capybara4: "streching_capybara.png"
 };
 
 
@@ -189,30 +192,73 @@ function saveScore(newScore) {
   updatePlayerInfo();
 }
 
+function saveScore(newScore) {
+  // === Leaderboard (Top 10 Skor Tertinggi) ===
+  let scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
+  scores.push({ score: newScore, level, player: gameSettings.playerName, date: new Date().toLocaleDateString(), difficulty: gameSettings.difficulty });
+  scores.sort((a, b) => b.score - a.score);
+  scores = scores.slice(0, 10);
+  localStorage.setItem('capybaraScores', JSON.stringify(scores));
+
+  // === History (10 Match Terakhir) ===
+  let history = JSON.parse(localStorage.getItem('capybaraHistory')) || [];
+  history.unshift({ score: newScore, level, player: gameSettings.playerName, date: new Date().toLocaleString(), difficulty: gameSettings.difficulty });
+  history = history.slice(0, 10);
+  localStorage.setItem('capybaraHistory', JSON.stringify(history));
+
+  updatePlayerInfo();
+}
+
 function showLeaderboard() {
   showPage('leaderboard');
+
+  // === Leaderboard (Top 10 Skor Tertinggi) ===
   const scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
   const list = document.getElementById('scoreList');
   list.innerHTML = '';
 
   if (scores.length === 0) {
     list.innerHTML = '<li class="score-item"><span>Belum ada skor</span></li>';
-    return;
+  } else {
+    scores.forEach((entry, index) => {
+      const li = document.createElement('li');
+      li.className = 'score-item';
+      li.innerHTML = `
+        <span class="rank">#${index + 1}</span>
+        <div>
+          <div><strong>${entry.player}</strong></div>
+          <div>Skor: ${entry.score} | Level: ${entry.level}</div>
+          <div><small>${entry.date} | ${entry.difficulty}</small></div>
+        </div>
+      `;
+      list.appendChild(li);
+    });
   }
 
-  scores.forEach((entry, index) => {
-    const li = document.createElement('li');
-    li.className = 'score-item';
-    li.innerHTML = `
-      <span class="rank">#${index + 1}</span>
-      <div>
-        <div><strong>${entry.player}</strong></div>
-        <div>Skor: ${entry.score} | Level: ${entry.level}</div>
-        <div><small>${entry.date} | ${entry.difficulty}</small></div>
-      </div>`;
-    list.appendChild(li);
-  });
+  // === History (10 Match Terakhir) ===
+  const history = JSON.parse(localStorage.getItem('capybaraHistory')) || [];
+  const historyList = document.getElementById('historyList');
+  historyList.innerHTML = '';
+
+  if (history.length === 0) {
+    historyList.innerHTML = '<li class="score-item"><span>Belum ada riwayat</span></li>';
+  } else {
+    history.forEach((entry, index) => {
+      const li = document.createElement('li');
+      li.className = 'score-item';
+      li.innerHTML = `
+        <span class="rank">${index + 1}</span>
+        <div>
+          <div><strong>${entry.player}</strong></div>
+          <div>Skor: ${entry.score} | Level: ${entry.level}</div>
+          <div><small>${entry.date} | ${entry.difficulty}</small></div>
+        </div>
+      `;
+      historyList.appendChild(li);
+    });
+  }
 }
+
 
 function clearLeaderboardConfirm() {
   document.getElementById('confirmPopup').classList.add('show');
