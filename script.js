@@ -1,36 +1,29 @@
-// Game Variables
-function resetSettings() {
-  localStorage.removeItem('capybaraSettings');
-  gameSettings = {
-    playerName: 'Pemain',
-    gameDuration: 30,
-    difficulty: 'medium',
-    soundEnabled: true,
-    capybaraImage: 'capybara1'
-  };
-  saveSettings();
-  alert("Pengaturan berhasil direset!");
-  showHome();
-}
-
-// Capybara Images (pakai PNG kamu)
-
-const capybaraImages = {
-  capybara1: "bakpao_capybara.png",
-  capybara2: "hi_capybara.png",
-  capybara3: "sleep_capybara.png",
-  capybara4: "streching_capybara.png"
+let gameSettings = {
+  playerName: 'Pemain',
+  gameDuration: 30,
+  difficulty: 'medium',
+  soundEnabled: true,
+  capybaraImage: 'capybara1'
 };
 
+const capybaraImages = {
+  capybara1: "bakpao capybara.png",
+  capybara2: "Hi capybara.png",
+  capybara3: "sleep capybara.png",
+  capybara4: "streching capybara.png"
+};
 
-// Elements
+let score = 0;
+let level = 1;
+let timeLeft = gameSettings.gameDuration;
+let timer, moleTimer;
+let gameRunning = false;
+let gamePaused = false;
+
 const grid = document.getElementById('grid');
 const scoreDisplay = document.getElementById('score');
 const timeDisplay = document.getElementById('time');
 const levelDisplay = document.getElementById('level');
-
-
-// Init
 
 document.addEventListener('DOMContentLoaded', () => {
   loadSettings();
@@ -38,19 +31,17 @@ document.addEventListener('DOMContentLoaded', () => {
   updatePlayerInfo();
 });
 
-
-// Grid
-
 function createGrid() {
   grid.innerHTML = '';
   for (let i = 0; i < 9; i++) {
     const hole = document.createElement('div');
     hole.classList.add('hole');
     hole.dataset.index = i;
-    
+
     const img = document.createElement('img');
     img.classList.add('mole');
     img.alt = 'Capybara';
+    img.src = getCurrentCapybaraImage();
     hole.appendChild(img);
     grid.appendChild(hole);
 
@@ -58,25 +49,8 @@ function createGrid() {
   }
 }
 
-// ===============================
-// Mole Logic
-// ===============================
-function handleHoleClick(hole, img) {
-  if (!gameRunning || gamePaused || !img.classList.contains('show')) return;
-
-  if (img.dataset.type === 'capybara') {
-    score += 10;
-    scoreDisplay.textContent = score;
-
-    if (score > 0 && score % 50 === 0) {
-      level++;
-      levelDisplay.textContent = level;
-    }
-
-    img.classList.remove('show');
-  } else if (img.dataset.type === 'bomb') {
-    endGame(true);
-  }
+function getCurrentCapybaraImage() {
+  return capybaraImages[gameSettings.capybaraImage];
 }
 
 function showRandomMole() {
@@ -97,12 +71,7 @@ function showRandomMole() {
   }
 
   randomHole.classList.add('show');
-
   setTimeout(() => randomHole.classList.remove('show'), getDifficultyTimeout() + 500);
-}
-
-function getCurrentCapybaraImage() {
-  return capybaraImages[gameSettings.capybaraImage];
 }
 
 function createBombImage() {
@@ -114,9 +83,24 @@ function createBombImage() {
   `);
 }
 
-// ===============================
-// Game Controls
-// ===============================
+function handleHoleClick(hole, img) {
+  if (!gameRunning || gamePaused || !img.classList.contains('show')) return;
+
+  if (img.dataset.type === 'capybara') {
+    score += 10;
+    scoreDisplay.textContent = score;
+
+    if (score > 0 && score % 50 === 0) {
+      level++;
+      levelDisplay.textContent = level;
+    }
+
+    img.classList.remove('show');
+  } else if (img.dataset.type === 'bomb') {
+    endGame(true);
+  }
+}
+
 function startGame() {
   showPage('game');
   resetGame();
@@ -180,27 +164,14 @@ function getDifficultyTimeout() {
   return map[gameSettings.difficulty] || 1500;
 }
 
-// ===============================
 // Leaderboard
-// ===============================
 function saveScore(newScore) {
   let scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
   scores.push({ score: newScore, level, player: gameSettings.playerName, date: new Date().toLocaleDateString(), difficulty: gameSettings.difficulty });
   scores.sort((a, b) => b.score - a.score);
   scores = scores.slice(0, 10);
   localStorage.setItem('capybaraScores', JSON.stringify(scores));
-  updatePlayerInfo();
-}
 
-function saveScore(newScore) {
-  // === Leaderboard (Top 10 Skor Tertinggi) ===
-  let scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
-  scores.push({ score: newScore, level, player: gameSettings.playerName, date: new Date().toLocaleDateString(), difficulty: gameSettings.difficulty });
-  scores.sort((a, b) => b.score - a.score);
-  scores = scores.slice(0, 10);
-  localStorage.setItem('capybaraScores', JSON.stringify(scores));
-
-  // === History (10 Match Terakhir) ===
   let history = JSON.parse(localStorage.getItem('capybaraHistory')) || [];
   history.unshift({ score: newScore, level, player: gameSettings.playerName, date: new Date().toLocaleString(), difficulty: gameSettings.difficulty });
   history = history.slice(0, 10);
@@ -212,93 +183,81 @@ function saveScore(newScore) {
 function showLeaderboard() {
   showPage('leaderboard');
 
-  // === Leaderboard (Top 10 Skor Tertinggi) ===
   const scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
   const list = document.getElementById('scoreList');
-  list.innerHTML = '';
-
-  if (scores.length === 0) {
-    list.innerHTML = '<li class="score-item"><span>Belum ada skor</span></li>';
-  } else {
-    scores.forEach((entry, index) => {
-      const li = document.createElement('li');
-      li.className = 'score-item';
-      li.innerHTML = `
-        <span class="rank">#${index + 1}</span>
+  list.innerHTML = scores.length === 0
+    ? '<li class="score-item"><span>Belum ada skor</span></li>'
+    : scores.map((entry, i) => `
+      <li class="score-item">
+        <span class="rank">#${i + 1}</span>
         <div>
           <div><strong>${entry.player}</strong></div>
           <div>Skor: ${entry.score} | Level: ${entry.level}</div>
           <div><small>${entry.date} | ${entry.difficulty}</small></div>
         </div>
-      `;
-      list.appendChild(li);
-    });
-  }
+      </li>
+    `).join('');
 
-  // === History (10 Match Terakhir) ===
   const history = JSON.parse(localStorage.getItem('capybaraHistory')) || [];
   const historyList = document.getElementById('historyList');
-  historyList.innerHTML = '';
-
-  if (history.length === 0) {
-    historyList.innerHTML = '<li class="score-item"><span>Belum ada riwayat</span></li>';
-  } else {
-    history.forEach((entry, index) => {
-      const li = document.createElement('li');
-      li.className = 'score-item';
-      li.innerHTML = `
-        <span class="rank">${index + 1}</span>
+  historyList.innerHTML = history.length === 0
+    ? '<li class="score-item"><span>Belum ada riwayat</span></li>'
+    : history.map((entry, i) => `
+      <li class="score-item">
+        <span class="rank">${i + 1}</span>
         <div>
           <div><strong>${entry.player}</strong></div>
           <div>Skor: ${entry.score} | Level: ${entry.level}</div>
           <div><small>${entry.date} | ${entry.difficulty}</small></div>
         </div>
-      `;
-      historyList.appendChild(li);
-    });
-  }
+      </li>
+    `).join('');
 }
 
-
-function clearLeaderboardConfirm() {
-  document.getElementById('confirmPopup').classList.add('show');
-}
-function hideConfirmPopup() {
-  document.getElementById('confirmPopup').classList.remove('show');
-}
-function confirmClearLeaderboard() {
-  localStorage.removeItem('capybaraScores');
-  hideConfirmPopup();
-  showLeaderboard();
-  document.getElementById('deleteSuccessPopup').classList.add('show');
-  setTimeout(() => document.getElementById('deleteSuccessPopup').classList.remove('show'), 2000);
-}
-
-// ===============================
 // Settings
-// ===============================
 function showSettings() {
   showPage('settings');
   document.getElementById('playerNameInput').value = gameSettings.playerName;
-  document.getElementById('gameDuration').value = gameSettings.gameDuration;
-  document.getElementById('difficulty').value = gameSettings.difficulty;
   document.getElementById('soundSetting').value = gameSettings.soundEnabled ? 'on' : 'off';
-  document.getElementById('durationValue').textContent = gameSettings.gameDuration;
+  document.getElementById('durationSetting').value = gameSettings.gameDuration;
   updatePresetSelection();
 }
 
 function saveSettings() {
   gameSettings.playerName = document.getElementById('playerNameInput').value || 'Pemain';
-  gameSettings.gameDuration = parseInt(document.getElementById('gameDuration').value);
-  gameSettings.difficulty = document.getElementById('difficulty').value;
   gameSettings.soundEnabled = document.getElementById('soundSetting').value === 'on';
-  showSuccessPopup();
+  gameSettings.gameDuration = parseInt(document.getElementById('durationSetting').value);
   localStorage.setItem('capybaraSettings', JSON.stringify(gameSettings));
+  document.getElementById('playerName').textContent = gameSettings.playerName;
+  updatePresetSelection();
+  showSuccessPopup();
 }
 
 function loadSettings() {
   const saved = JSON.parse(localStorage.getItem('capybaraSettings'));
   if (saved) gameSettings = saved;
+  document.getElementById('playerNameInput').value = gameSettings.playerName;
+  document.getElementById('playerName').textContent = gameSettings.playerName;
+  document.getElementById('soundSetting').value = gameSettings.soundEnabled ? 'on' : 'off';
+  document.getElementById('durationSetting').value = gameSettings.gameDuration;
+  updatePresetSelection();
+}
+
+function resetSettings() {
+  gameSettings = {
+    playerName: 'Pemain',
+    gameDuration: 30,
+    difficulty: 'medium',
+    soundEnabled: true,
+    capybaraImage: 'capybara1'
+  };
+  localStorage.setItem('capybaraSettings', JSON.stringify(gameSettings));
+  document.getElementById('playerNameInput').value = gameSettings.playerName;
+  document.getElementById('playerName').textContent = gameSettings.playerName;
+  document.getElementById('soundSetting').value = 'on';
+  document.getElementById('durationSetting').value = 30;
+  updatePresetSelection();
+  showSuccessPopup();
 }
 
 function updatePresetSelection() {
@@ -312,9 +271,6 @@ function selectPresetImage(key) {
   updatePresetSelection();
 }
 
-// ===============================
-// Utils
-// ===============================
 function updatePlayerInfo() {
   document.getElementById('playerName').textContent = gameSettings.playerName;
   const scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
@@ -325,11 +281,30 @@ function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
+
 function showHome() {
   showPage('home');
 }
+
 function showSuccessPopup() {
   const popup = document.getElementById('successPopup');
   popup.classList.add('show');
   setTimeout(() => popup.classList.remove('show'), 2000);
+}
+
+function clearLeaderboardConfirm() {
+  document.getElementById('confirmPopup').classList.add('show');
+}
+
+function hideConfirmPopup() {
+  document.getElementById('confirmPopup').classList.remove('show');
+}
+
+function confirmClearLeaderboard() {
+  localStorage.removeItem('capybaraScores');
+  localStorage.removeItem('capybaraHistory');
+  hideConfirmPopup();
+  showLeaderboard();
+  document.getElementById('deleteSuccessPopup').classList.add('show');
+  setTimeout(() => document.getElementById('deleteSuccessPopup').classList.remove('show'), 2000);
 }
