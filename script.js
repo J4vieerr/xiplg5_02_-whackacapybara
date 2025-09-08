@@ -1,4 +1,23 @@
+// ===============================
 // Game Variables
+// ===============================
+let gameRunning = false;
+let gamePaused = false;
+let score = 0;
+let level = 1;
+let timeLeft = 30;
+let timer;
+let moleTimer;
+
+let gameSettings = {
+  playerName: 'Pemain',
+  gameDuration: 30,
+  difficulty: 'medium',
+  soundEnabled: true,
+  capybaraImage: 'capybara1'
+};
+
+// Reset Settings
 function resetSettings() {
   localStorage.removeItem('capybaraSettings');
   gameSettings = {
@@ -13,15 +32,13 @@ function resetSettings() {
   showHome();
 }
 
-// Capybara Images (pakai PNG kamu)
-
+// Capybara Images (pakai nama file asli dari folder kamu)
 const capybaraImages = {
-  capybara1: "bakpao_capybara.png",
-  capybara2: "hi_capybara.png",
-  capybara3: "sleep_capybara.png",
-  capybara4: "streching_capybara.png"
+  capybara1: "bakpao capybara.png",
+  capybara2: "Hi capybara.png",
+  capybara3: "sleep capybara.png",
+  capybara4: "streching capybara.png"
 };
-
 
 // Elements
 const grid = document.getElementById('grid');
@@ -29,25 +46,24 @@ const scoreDisplay = document.getElementById('score');
 const timeDisplay = document.getElementById('time');
 const levelDisplay = document.getElementById('level');
 
-
 // Init
-
 document.addEventListener('DOMContentLoaded', () => {
   loadSettings();
   createGrid();
   updatePlayerInfo();
+  updateLevelProgress();
 });
 
-
+// ===============================
 // Grid
-
+// ===============================
 function createGrid() {
   grid.innerHTML = '';
   for (let i = 0; i < 9; i++) {
     const hole = document.createElement('div');
     hole.classList.add('hole');
     hole.dataset.index = i;
-    
+
     const img = document.createElement('img');
     img.classList.add('mole');
     img.alt = 'Capybara';
@@ -67,8 +83,9 @@ function handleHoleClick(hole, img) {
   if (img.dataset.type === 'capybara') {
     score += 10;
     scoreDisplay.textContent = score;
+    updateLevelProgress();
 
-    if (score > 0 && score % 50 === 0) {
+    if (score > 0 && score % 50 === 0 && level < 5) {
       level++;
       levelDisplay.textContent = level;
     }
@@ -97,7 +114,6 @@ function showRandomMole() {
   }
 
   randomHole.classList.add('show');
-
   setTimeout(() => randomHole.classList.remove('show'), getDifficultyTimeout() + 500);
 }
 
@@ -142,6 +158,7 @@ function resetGame() {
   level = 1;
   timeLeft = gameSettings.gameDuration;
   clearTimers();
+  updateLevelProgress();
 }
 
 function clearTimers() {
@@ -175,9 +192,33 @@ function endGame(hitBomb = false) {
   showHome();
 }
 
+// ===============================
+// Difficulty & Level Logic
+// ===============================
+// ===============================
+// Difficulty & Level Logic
+// ===============================
 function getDifficultyTimeout() {
-  const map = { easy: 2000, medium: 1500, hard: 1000 };
-  return map[gameSettings.difficulty] || 1500;
+  const base = { easy: 2000, medium: 1500, hard: 1000 }[gameSettings.difficulty] || 1500;
+
+  // Atur pengurangan waktu per level (semakin cepat)
+  let timeout;
+  switch (level) {
+    case 1: timeout = base; break;            // Level 1: normal
+    case 2: timeout = base - 200; break;      // Level 2: lebih cepat
+    case 3: timeout = base - 400; break;      // Level 3: makin cepat
+    case 4: timeout = base - 600; break;      // Level 4: sulit
+    case 5: timeout = base - 800; break;      // Level 5: super cepat
+    default: timeout = Math.max(400, base - 800); // Safety: jangan terlalu cepat
+  }
+  return Math.max(400, timeout); // minimal 400ms biar masih bisa dipukul
+}
+
+
+function updateLevelProgress() {
+  let progress = score % 50;
+  let percent = (progress / 50) * 100;
+  document.getElementById('levelProgressBar').style.width = percent + "%";
 }
 
 // ===============================
@@ -189,89 +230,13 @@ function saveScore(newScore) {
   scores.sort((a, b) => b.score - a.score);
   scores = scores.slice(0, 10);
   localStorage.setItem('capybaraScores', JSON.stringify(scores));
-  updatePlayerInfo();
-}
 
-function saveScore(newScore) {
-  // === Leaderboard (Top 10 Skor Tertinggi) ===
-  let scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
-  scores.push({ score: newScore, level, player: gameSettings.playerName, date: new Date().toLocaleDateString(), difficulty: gameSettings.difficulty });
-  scores.sort((a, b) => b.score - a.score);
-  scores = scores.slice(0, 10);
-  localStorage.setItem('capybaraScores', JSON.stringify(scores));
-
-  // === History (10 Match Terakhir) ===
   let history = JSON.parse(localStorage.getItem('capybaraHistory')) || [];
   history.unshift({ score: newScore, level, player: gameSettings.playerName, date: new Date().toLocaleString(), difficulty: gameSettings.difficulty });
   history = history.slice(0, 10);
   localStorage.setItem('capybaraHistory', JSON.stringify(history));
 
   updatePlayerInfo();
-}
-
-function showLeaderboard() {
-  showPage('leaderboard');
-
-  // === Leaderboard (Top 10 Skor Tertinggi) ===
-  const scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
-  const list = document.getElementById('scoreList');
-  list.innerHTML = '';
-
-  if (scores.length === 0) {
-    list.innerHTML = '<li class="score-item"><span>Belum ada skor</span></li>';
-  } else {
-    scores.forEach((entry, index) => {
-      const li = document.createElement('li');
-      li.className = 'score-item';
-      li.innerHTML = `
-        <span class="rank">#${index + 1}</span>
-        <div>
-          <div><strong>${entry.player}</strong></div>
-          <div>Skor: ${entry.score} | Level: ${entry.level}</div>
-          <div><small>${entry.date} | ${entry.difficulty}</small></div>
-        </div>
-      `;
-      list.appendChild(li);
-    });
-  }
-
-  // === History (10 Match Terakhir) ===
-  const history = JSON.parse(localStorage.getItem('capybaraHistory')) || [];
-  const historyList = document.getElementById('historyList');
-  historyList.innerHTML = '';
-
-  if (history.length === 0) {
-    historyList.innerHTML = '<li class="score-item"><span>Belum ada riwayat</span></li>';
-  } else {
-    history.forEach((entry, index) => {
-      const li = document.createElement('li');
-      li.className = 'score-item';
-      li.innerHTML = `
-        <span class="rank">${index + 1}</span>
-        <div>
-          <div><strong>${entry.player}</strong></div>
-          <div>Skor: ${entry.score} | Level: ${entry.level}</div>
-          <div><small>${entry.date} | ${entry.difficulty}</small></div>
-        </div>
-      `;
-      historyList.appendChild(li);
-    });
-  }
-}
-
-
-function clearLeaderboardConfirm() {
-  document.getElementById('confirmPopup').classList.add('show');
-}
-function hideConfirmPopup() {
-  document.getElementById('confirmPopup').classList.remove('show');
-}
-function confirmClearLeaderboard() {
-  localStorage.removeItem('capybaraScores');
-  hideConfirmPopup();
-  showLeaderboard();
-  document.getElementById('deleteSuccessPopup').classList.add('show');
-  setTimeout(() => document.getElementById('deleteSuccessPopup').classList.remove('show'), 2000);
 }
 
 // ===============================

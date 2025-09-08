@@ -426,3 +426,20 @@ h1 {
   animation: gameOverShake 0.5s ease-in-out 3;
 }
 
+/* Level Progress Bar */
+#levelProgressContainer {
+  width: 100%;
+  height: 15px;
+  background: #e2e8f0;
+  border-radius: 10px;
+  margin: 10px 0;
+  overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#levelProgressBar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #74b9ff, #0984e3);
+  transition: width 0.3s ease;
+}
