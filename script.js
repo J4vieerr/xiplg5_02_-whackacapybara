@@ -1,16 +1,12 @@
-// Game Variables
-let score = 0, timeLeft = 30, timer, moleTimer, gameRunning = false;
-let level = 1, gamePaused = false;
+let score = 0, timeLeft = 60, timer, moleTimer, gameRunning = false;
+let level = 1, gamePaused = false, hits = 0;
 
 let gameSettings = {
-  playerName: 'Pemain',
-  gameDuration: 30,
-  difficulty: 'medium',
+  playerName: '',
+  gameDuration: 60,
   soundEnabled: true,
   capybaraImage: 'capybara1'
 };
-
-// Capybara Images (pakai PNG kamu)
 
 const capybaraImages = {
   capybara1: "bakpao capybara.png",
@@ -19,24 +15,19 @@ const capybaraImages = {
   capybara4: "streching capybara.png"
 };
 
-
-// Elements
 const grid = document.getElementById('grid');
 const scoreDisplay = document.getElementById('score');
 const timeDisplay = document.getElementById('time');
 const levelDisplay = document.getElementById('level');
-
-
-// Init
+const gameOverMessage = document.getElementById('gameOverMessage');
+const finalScoreDisplay = document.getElementById('finalScore');
+const finalLevelDisplay = document.getElementById('finalLevel');
 
 document.addEventListener('DOMContentLoaded', () => {
   loadSettings();
   createGrid();
   updatePlayerInfo();
 });
-
-
-// Grid
 
 function createGrid() {
   grid.innerHTML = '';
@@ -55,23 +46,23 @@ function createGrid() {
   }
 }
 
-// ===============================
-// Mole Logic
-// ===============================
 function handleHoleClick(hole, img) {
   if (!gameRunning || gamePaused || !img.classList.contains('show')) return;
 
   if (img.dataset.type === 'capybara') {
     score += 10;
+    hits++;
     scoreDisplay.textContent = score;
 
-    if (score > 0 && score % 50 === 0) {
+    if (hits % 5 === 0 && level < 5) {
       level++;
       levelDisplay.textContent = level;
     }
 
     img.classList.remove('show');
+    if (gameSettings.soundEnabled) document.getElementById('hitSound').play();
   } else if (img.dataset.type === 'bomb') {
+    if (gameSettings.soundEnabled) document.getElementById('bombSound').play();
     endGame(true);
   }
 }
@@ -95,7 +86,7 @@ function showRandomMole() {
 
   randomHole.classList.add('show');
 
-  setTimeout(() => randomHole.classList.remove('show'), getDifficultyTimeout() + 500);
+  setTimeout(() => randomHole.classList.remove('show'), getLevelTimeout() + 500);
 }
 
 function getCurrentCapybaraImage() {
@@ -111,9 +102,6 @@ function createBombImage() {
   `);
 }
 
-// ===============================
-// Game Controls
-// ===============================
 function startGame() {
   showPage('game');
   resetGame();
@@ -131,13 +119,14 @@ function startGame() {
     }
   }, 1000);
 
-  moleTimer = setInterval(showRandomMole, getDifficultyTimeout());
+  moleTimer = setInterval(showRandomMole, getLevelTimeout());
 }
 
 function resetGame() {
   score = 0;
   level = 1;
-  timeLeft = gameSettings.gameDuration;
+  hits = 0;
+  timeLeft = 60;
   clearTimers();
 }
 
@@ -151,7 +140,7 @@ function pauseGame() {
   if (gamePaused) {
     gamePaused = false;
     pauseBtn.textContent = '⏸️ Pause';
-    moleTimer = setInterval(showRandomMole, getDifficultyTimeout());
+    moleTimer = setInterval(showRandomMole, getLevelTimeout());
   } else {
     gamePaused = true;
     pauseBtn.textContent = '▶️ Resume';
@@ -159,7 +148,7 @@ function pauseGame() {
   }
 }
 
-function endGame(hitBomb = false) {
+function endGame(hitBomb = false, manualEnd = false) {
   gameRunning = false;
   clearTimers();
 
@@ -167,22 +156,35 @@ function endGame(hitBomb = false) {
 
   saveScore(score);
 
-  let message = hitBomb ? `💥 Kena Bom! Skor: ${score}` : `⏰ Waktu habis! Skor: ${score} | Level: ${level}`;
-  alert(message);
-  showHome();
+  let message;
+  if (hitBomb) {
+    message = '💥 Kena Bom!';
+  } else if (manualEnd) {
+    message = '🏁 Permainan Selesai!';
+  } else {
+    message = '⏰ Waktu Habis!';
+  }
+
+  gameOverMessage.innerHTML = message;
+  finalScoreDisplay.textContent = score;
+  finalLevelDisplay.textContent = level;
+  showPage('gameOver');
 }
 
-function getDifficultyTimeout() {
-  const map = { easy: 2000, medium: 1500, hard: 1000 };
-  return map[gameSettings.difficulty] || 1500;
+function getLevelTimeout() {
+  const timeouts = {
+    1: 2000,
+    2: 1500,
+    3: 1200,
+    4: 1000,
+    5: 800
+  };
+  return timeouts[level] || 2000;
 }
 
-// ===============================
-// Leaderboard
-// ===============================
 function saveScore(newScore) {
   let scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
-  scores.push({ score: newScore, level, player: gameSettings.playerName, date: new Date().toLocaleDateString(), difficulty: gameSettings.difficulty });
+  scores.push({ score: newScore, level, player: gameSettings.playerName || 'Pemain', date: new Date().toLocaleDateString() });
   scores.sort((a, b) => b.score - a.score);
   scores = scores.slice(0, 10);
   localStorage.setItem('capybaraScores', JSON.stringify(scores));
@@ -208,46 +210,25 @@ function showLeaderboard() {
       <div>
         <div><strong>${entry.player}</strong></div>
         <div>Skor: ${entry.score} | Level: ${entry.level}</div>
-        <div><small>${entry.date} | ${entry.difficulty}</small></div>
+        <div><small>${entry.date}</small></div>
       </div>`;
     list.appendChild(li);
   });
 }
 
-function clearLeaderboardConfirm() {
-  document.getElementById('confirmPopup').classList.add('show');
-}
-function hideConfirmPopup() {
-  document.getElementById('confirmPopup').classList.remove('show');
-}
-function confirmClearLeaderboard() {
-  localStorage.removeItem('capybaraScores');
-  hideConfirmPopup();
-  showLeaderboard();
-  document.getElementById('deleteSuccessPopup').classList.add('show');
-  setTimeout(() => document.getElementById('deleteSuccessPopup').classList.remove('show'), 2000);
-}
-
-// ===============================
-// Settings
-// ===============================
 function showSettings() {
   showPage('settings');
-  document.getElementById('playerNameInput').value = gameSettings.playerName;
-  document.getElementById('gameDuration').value = gameSettings.gameDuration;
-  document.getElementById('difficulty').value = gameSettings.difficulty;
+  document.getElementById('playerNameInput').value = '';
   document.getElementById('soundSetting').value = gameSettings.soundEnabled ? 'on' : 'off';
-  document.getElementById('durationValue').textContent = gameSettings.gameDuration;
   updatePresetSelection();
 }
 
 function saveSettings() {
   gameSettings.playerName = document.getElementById('playerNameInput').value || 'Pemain';
-  gameSettings.gameDuration = parseInt(document.getElementById('gameDuration').value);
-  gameSettings.difficulty = document.getElementById('difficulty').value;
   gameSettings.soundEnabled = document.getElementById('soundSetting').value === 'on';
   showSuccessPopup();
   localStorage.setItem('capybaraSettings', JSON.stringify(gameSettings));
+  updatePlayerInfo();
 }
 
 function loadSettings() {
@@ -266,11 +247,8 @@ function selectPresetImage(key) {
   updatePresetSelection();
 }
 
-// ===============================
-// Utils
-// ===============================
 function updatePlayerInfo() {
-  document.getElementById('playerName').textContent = gameSettings.playerName;
+  document.getElementById('playerName').textContent = gameSettings.playerName || 'Pemain';
   const scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
   document.getElementById('highScore').textContent = scores.length > 0 ? scores[0].score : 0;
 }
@@ -279,9 +257,11 @@ function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
+
 function showHome() {
   showPage('home');
 }
+
 function showSuccessPopup() {
   const popup = document.getElementById('successPopup');
   popup.classList.add('show');

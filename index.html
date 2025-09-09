@@ -25,7 +25,7 @@
       <h1>Whack a Capybara</h1>
       <div id="info">
         <div class="info-item">Skor: <span id="score">0</span></div>
-        <div class="info-item">Waktu: <span id="time">30</span>s</div>
+        <div class="info-item">Waktu: <span id="time">60</span>s</div>
         <div class="info-item">Level: <span id="level">1</span></div>
       </div>
       <div id="grid"></div>
@@ -33,12 +33,28 @@
       <button class="btn btn-secondary" onclick="endGame()">🏁 Selesai</button>
     </div>
 
+    <!-- GAME OVER PAGE -->
+    <div id="gameOver" class="page">
+      <h1>Game Over!</h1>
+      <div class="game-over-content">
+        <div id="gameOverMessage"></div>
+        <div class="game-over-stats">
+          <div>Skor: <span id="finalScore">0</span></div>
+          <div>Level: <span id="finalLevel">1</span></div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn" onclick="startGame()">🔄 Main Lagi</button>
+          <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali ke Beranda</button>
+          <button class="btn btn-success" onclick="showLeaderboard()">🏆 Lihat Leaderboard</button>
+        </div>
+      </div>
+    </div>
+
     <!-- LEADERBOARD -->
     <div id="leaderboard" class="page">
       <h1>🏆 Leaderboard 🏆</h1>
       <ul class="score-list" id="scoreList"></ul>
       <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-        <button class="btn btn-danger" onclick="clearLeaderboardConfirm()">🗑️ Hapus Semua</button>
         <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali</button>
       </div>
     </div>
@@ -69,21 +85,6 @@
             </div>
           </div>
         </div>
-
-        <div class="setting-item">
-          <label class="setting-label">Durasi Game (detik):</label>
-          <input type="range" class="setting-control" id="gameDuration" min="15" max="60" value="30">
-          <div>Nilai: <span id="durationValue">30</span> detik</div>
-        </div>
-        
-        <div class="setting-item">
-          <label class="setting-label">Tingkat Kesulitan:</label>
-          <select class="setting-control" id="difficulty">
-            <option value="easy">Mudah (2 detik)</option>
-            <option value="medium" selected>Sedang (1.5 detik)</option>
-            <option value="hard">Sulit (1 detik)</option>
-          </select>
-        </div>
         
         <div class="setting-item">
           <label class="setting-label">Suara:</label>
@@ -104,26 +105,6 @@
       <div class="popup-icon">✅</div>
       <div class="popup-message">Pengaturan Tersimpan!</div>
       <div class="popup-submessage">Data Anda telah berhasil disimpan</div>
-    </div>
-  </div>
-
-  <div id="confirmPopup" class="popup">
-    <div class="popup-content confirm">
-      <div class="popup-icon">⚠️</div>
-      <div class="popup-message">Konfirmasi Hapus</div>
-      <div class="popup-submessage">Yakin ingin menghapus semua skor di leaderboard?</div>
-      <div style="display:flex;gap:10px;justify-content:center;">
-        <button class="btn btn-danger" onclick="confirmClearLeaderboard()">Ya, Hapus</button>
-        <button class="btn btn-secondary" onclick="hideConfirmPopup()">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="deleteSuccessPopup" class="popup">
-    <div class="popup-content success">
-      <div class="popup-icon">🗑️</div>
-      <div class="popup-message">Berhasil Dihapus!</div>
-      <div class="popup-submessage">Leaderboard telah dikosongkan</div>
     </div>
   </div>
 
