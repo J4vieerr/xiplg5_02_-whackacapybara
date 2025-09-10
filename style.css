@@ -437,3 +437,22 @@ h1 {
 .game-over-animation {
   animation: gameOverShake 0.5s ease-in-out 3;
 }
+
+/* === Tambahan: Volume Indicator === */
+.volume-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 18px;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.volume-indicator.show {
+  opacity: 1;
+}
