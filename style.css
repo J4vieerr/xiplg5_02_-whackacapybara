@@ -14,7 +14,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Hammer Cursor for Game */
 #game {
   cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect x="8" y="4" width="16" height="8" rx="2" fill="%238B4513"/><rect x="14" y="12" width="4" height="16" rx="1" fill="%23654321"/><circle cx="16" cy="6" r="1" fill="%23A0522D"/></svg>'), auto;
 }
@@ -23,7 +22,6 @@ body {
   cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect x="8" y="4" width="16" height="8" rx="2" fill="%23FF6B6B"/><rect x="14" y="12" width="4" height="16" rx="1" fill="%23654321"/><circle cx="16" cy="6" r="1" fill="%23FF8E8E"/></svg>'), pointer;
 }
 
-/* Animated background */
 body::before {
   content: '';
   position: fixed;
@@ -130,17 +128,16 @@ h1 {
   box-shadow: 0 6px 20px rgba(214, 48, 49, 0.4);
 }
 
-/* Pages */
 .page {
   position: relative;
   z-index: 1;
 }
 
-#home, #game, #leaderboard, #settings {
+#home, #game, #gameOver, #leaderboard, #settings {
   display: none;
 }
 
-#home.active, #game.active, #leaderboard.active, #settings.active {
+#home.active, #game.active, #gameOver.active, #leaderboard.active, #settings.active {
   display: block;
   animation: fadeIn 0.5s ease;
 }
@@ -150,7 +147,6 @@ h1 {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Grid Game */
 #grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -203,7 +199,6 @@ h1 {
   100% { transform: translateX(-50%) scale(1); }
 }
 
-/* Info Bar */
 #info {
   display: flex;
   justify-content: space-around;
@@ -221,7 +216,6 @@ h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Leaderboard */
 .score-list {
   list-style: none;
   padding: 0;
@@ -248,7 +242,6 @@ h1 {
   color: #fd79a8;
 }
 
-/* Settings */
 .settings-grid {
   display: grid;
   gap: 20px;
@@ -284,7 +277,6 @@ h1 {
   border-color: #fd79a8;
 }
 
-/* Image selection buttons */
 .preset-images {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
@@ -327,7 +319,6 @@ h1 {
   line-height: 1;
 }
 
-/* Player name input */
 .player-info {
   background: linear-gradient(135deg, #74b9ff, #0984e3);
   color: white;
@@ -336,7 +327,6 @@ h1 {
   margin-bottom: 20px;
 }
 
-/* Success Popup */
 .popup {
   position: fixed;
   top: 0;
@@ -389,7 +379,30 @@ h1 {
   opacity: 0.9;
 }
 
-/* Responsive */
+.game-over-content {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  padding: 20px;
+  border-radius: 15px;
+  margin: 20px 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.game-over-stats {
+  margin: 20px 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #4a5568;
+}
+
+.game-over-stats div {
+  background: linear-gradient(135deg, #fd79a8, #fdcb6e);
+  padding: 10px 20px;
+  border-radius: 15px;
+  color: white;
+  margin: 10px auto;
+  width: fit-content;
+}
+
 @media (max-width: 600px) {
   .container {
     margin: 10px;
@@ -415,7 +428,6 @@ h1 {
   }
 }
 
-/* Game Over Animation */
 @keyframes gameOverShake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-10px); }
@@ -424,22 +436,4 @@ h1 {
 
 .game-over-animation {
   animation: gameOverShake 0.5s ease-in-out 3;
-}
-
-/* Level Progress Bar */
-#levelProgressContainer {
-  width: 100%;
-  height: 15px;
-  background: #e2e8f0;
-  border-radius: 10px;
-  margin: 10px 0;
-  overflow: hidden;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
-}
-
-#levelProgressBar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #74b9ff, #0984e3);
-  transition: width 0.3s ease;
 }

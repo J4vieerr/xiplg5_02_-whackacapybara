@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,66 +8,68 @@
 </head>
 <body>
   <div class="container">
-
     <!-- HOME PAGE -->
     <div id="home" class="page active">
-      <h1>🐹 Whack a Capybaraaa 🐹</h1>
+      <h1>🐹 Whack a Capybara 🐹</h1>
       <div class="player-info" id="playerInfo">
         <div>Selamat datang, <strong id="playerName">Pemain</strong>!</div>
         <div>Skor Tertinggi: <strong id="highScore">0</strong></div>
       </div>
       <button class="btn" onclick="startGame()">🎮 Mulai Main</button>
       <button class="btn btn-secondary" onclick="showLeaderboard()">🏆 Leaderboard</button>
-      <button class="btn btn-success" onclick="showSettings()">⚙ Pengaturan</button>
+      <button class="btn btn-success" onclick="showSettings()">⚙️ Pengaturan</button>
     </div>
 
-    <!-- GAME PAGE -->
+    <!-- GAME AREA -->
     <div id="game" class="page">
       <h1>Whack a Capybara</h1>
       <div id="info">
         <div class="info-item">Skor: <span id="score">0</span></div>
-        <div class="info-item">Waktu: <span id="time">30</span>s</div>
+        <div class="info-item">Waktu: <span id="time">60</span>s</div>
         <div class="info-item">Level: <span id="level">1</span></div>
       </div>
-
       <div id="grid"></div>
+      <button class="btn" onclick="pauseGame()" id="pauseBtn">⏸️ Pause</button>
+      <button class="btn btn-secondary" onclick="endGame()">🏁 Selesai</button>
+    </div>
 
-      <div class="game-buttons">
-        <button class="btn" onclick="pauseGame()" id="pauseBtn">⏸ Pause</button>
-        <button class="btn btn-secondary" onclick="endGame()">🏁 Selesai</button>
-      </div>
-
-      <!-- progress level -->
-      <div class="progress-bar">
-        <div id="levelProgressBar"></div>
+    <!-- GAME OVER PAGE -->
+    <div id="gameOver" class="page">
+      <h1>Game Over!</h1>
+      <div class="game-over-content">
+        <div id="gameOverMessage"></div>
+        <div class="game-over-stats">
+          <div>Skor: <span id="finalScore">0</span></div>
+          <div>Level: <span id="finalLevel">1</span></div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn" onclick="startGame()">🔄 Main Lagi</button>
+          <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali ke Beranda</button>
+          <button class="btn btn-success" onclick="showLeaderboard()">🏆 Lihat Leaderboard</button>
+        </div>
       </div>
     </div>
 
-    <!-- LEADERBOARD PAGE -->
+    <!-- LEADERBOARD -->
     <div id="leaderboard" class="page">
       <h1>🏆 Leaderboard 🏆</h1>
       <ul class="score-list" id="scoreList"></ul>
-    
-      <h2>📜 Riwayat 10 Permainan Terakhir</h2>
-      <ul class="score-list" id="historyList"></ul>
-    
-      <div class="center-btns">
-        <button class="btn btn-danger" onclick="clearLeaderboardConfirm()">🗑 Hapus Semua</button>
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
         <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali</button>
       </div>
     </div>
 
-    <!-- SETTINGS PAGE -->
+    <!-- SETTINGS -->
     <div id="settings" class="page">
-      <h1>⚙ Pengaturan</h1>
+      <h1>⚙️ Pengaturan</h1>
       <div class="settings-grid">
         <div class="setting-item">
-          <label>Nama Pemain:</label>
-          <input type="text" id="playerNameInput" placeholder="Masukkan nama Anda">
+          <label class="setting-label">Nama Pemain:</label>
+          <input type="text" class="setting-control" id="playerNameInput" placeholder="Masukkan nama Anda">
         </div>
         
         <div class="setting-item">
-          <label>Pilih Gambar Capybara:</label>
+          <label class="setting-label">Pilih Gambar Capybara:</label>
           <div class="preset-images">
             <div class="preset-btn active" onclick="selectPresetImage('capybara1')" data-image="capybara1">
               <img src="bakpao capybara.png" alt="Capybara 1">
@@ -83,41 +85,16 @@
             </div>
           </div>
         </div>
-
-        <div class="setting-item">
-          <label class="setting-label">Durasi Game (detik):</label>
-          <input type="range" class="setting-control" id="gameDuration" min="15" max="60" value="30">
-          <div>Nilai: <span id="durationValue">30</span> detik</div>
-        </div>
         
         <div class="setting-item">
-          <label class="setting-label">Tingkat Kesulitan:</label>
-          <select class="setting-control" id="difficulty">
-            <option value="easy">Mudah (2 detik)</option>
-            <option value="medium" selected>Sedang (1.5 detik)</option>
-            <option value="hard">Sulit (1 detik)</option>
-          </select>
-        </div>
-        
-        <div class="setting-item">
-          <label>Suara:</label>
-          <select id="soundSetting">
+          <label class="setting-label">Suara:</label>
+          <select class="setting-control" id="soundSetting">
             <option value="on" selected>Hidup</option>
             <option value="off">Mati</option>
           </select>
         </div>
-
-        <div class="setting-item">
-          <label class="setting-label">Durasi Game:</label>
-          <select class="setting-control" id="durationSetting">
-            <option value="30" selected>30 detik</option>
-            <option value="45">45 detik</option>
-            <option value="60">60 detik</option>
-          </select>
-        </div>
       </div>
       <button class="btn btn-success" onclick="saveSettings()">💾 Simpan</button>
-      <button class="btn btn-danger" onclick="resetSettings()">♻ Reset</button>
       <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali</button>
     </div>
   </div>
@@ -131,31 +108,9 @@
     </div>
   </div>
 
-  <div id="confirmPopup" class="popup">
-    <div class="popup-content confirm">
-      <div class="popup-icon">⚠️</div>
-      <div class="popup-message">Konfirmasi Hapus</div>
-      <div class="popup-submessage">Yakin ingin menghapus semua skor di leaderboard?</div>
-      <div style="display:flex;gap:10px;justify-content:center;">
-        <button class="btn btn-danger" onclick="confirmClearLeaderboard()">Ya, Hapus</button>
-        <button class="btn btn-secondary" onclick="hideConfirmPopup()">Batal</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="deleteSuccessPopup" class="popup">
-    <div class="popup-content success">
-      <div class="popup-icon">🗑️</div>
-      <div class="popup-message">Berhasil Dihapus!</div>
-      <div class="popup-submessage">Leaderboard telah dikosongkan</div>
-    </div>
-  </div>
-
-  <!-- AUDIO -->
   <audio id="hitSound" src="hit.mp3" preload="auto"></audio>
   <audio id="bombSound" src="bomb.mp3" preload="auto"></audio>
 
-  <!-- SCRIPT -->
   <script src="script.js"></script>
 </body>
 </html>

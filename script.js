@@ -1,19 +1,12 @@
-// Game Variables
-function resetSettings() {
-  localStorage.removeItem('capybaraSettings');
-  gameSettings = {
-    playerName: 'Pemain',
-    gameDuration: 30,
-    difficulty: 'medium',
-    soundEnabled: true,
-    capybaraImage: 'capybara1'
-  };
-  saveSettings();
-  alert("Pengaturan berhasil direset!");
-  showHome();
-}
+let score = 0, timeLeft = 60, timer, moleTimer, gameRunning = false;
+let level = 1, gamePaused = false, hits = 0;
 
-// Capybara Images (pakai PNG kamu)
+let gameSettings = {
+  playerName: '',
+  gameDuration: 60,
+  soundEnabled: true,
+  capybaraImage: 'capybara1'
+};
 
 const capybaraImages = {
   capybara1: "bakpao capybara.png",
@@ -22,25 +15,19 @@ const capybaraImages = {
   capybara4: "streching capybara.png"
 };
 
-
-// Elements
 const grid = document.getElementById('grid');
 const scoreDisplay = document.getElementById('score');
 const timeDisplay = document.getElementById('time');
 const levelDisplay = document.getElementById('level');
-
-
-// Init
+const gameOverMessage = document.getElementById('gameOverMessage');
+const finalScoreDisplay = document.getElementById('finalScore');
+const finalLevelDisplay = document.getElementById('finalLevel');
 
 document.addEventListener('DOMContentLoaded', () => {
   loadSettings();
   createGrid();
   updatePlayerInfo();
-  updateLevelProgress();
 });
-
-
-// Grid
 
 function createGrid() {
   grid.innerHTML = '';
@@ -48,11 +35,10 @@ function createGrid() {
     const hole = document.createElement('div');
     hole.classList.add('hole');
     hole.dataset.index = i;
-
+    
     const img = document.createElement('img');
     img.classList.add('mole');
     img.alt = 'Capybara';
-    img.src = getCurrentCapybaraImage();
     hole.appendChild(img);
     grid.appendChild(hole);
 
@@ -60,23 +46,23 @@ function createGrid() {
   }
 }
 
-// ===============================
-// Mole Logic
-// ===============================
 function handleHoleClick(hole, img) {
   if (!gameRunning || gamePaused || !img.classList.contains('show')) return;
 
   if (img.dataset.type === 'capybara') {
     score += 10;
+    hits++;
     scoreDisplay.textContent = score;
 
-    if (score > 0 && score % 50 === 0) {
+    if (hits % 5 === 0 && level < 5) {
       level++;
       levelDisplay.textContent = level;
     }
 
     img.classList.remove('show');
+    if (gameSettings.soundEnabled) document.getElementById('hitSound').play();
   } else if (img.dataset.type === 'bomb') {
+    if (gameSettings.soundEnabled) document.getElementById('bombSound').play();
     endGame(true);
   }
 }
@@ -99,7 +85,12 @@ function showRandomMole() {
   }
 
   randomHole.classList.add('show');
-  setTimeout(() => randomHole.classList.remove('show'), getDifficultyTimeout() + 500);
+
+  setTimeout(() => randomHole.classList.remove('show'), getLevelTimeout() + 500);
+}
+
+function getCurrentCapybaraImage() {
+  return capybaraImages[gameSettings.capybaraImage];
 }
 
 function createBombImage() {
@@ -109,24 +100,6 @@ function createBombImage() {
       <text x="50" y="75" text-anchor="middle" font-size="20" fill="white">💣</text>
     </svg>
   `);
-}
-
-function handleHoleClick(hole, img) {
-  if (!gameRunning || gamePaused || !img.classList.contains('show')) return;
-
-  if (img.dataset.type === 'capybara') {
-    score += 10;
-    scoreDisplay.textContent = score;
-
-    if (score > 0 && score % 50 === 0) {
-      level++;
-      levelDisplay.textContent = level;
-    }
-
-    img.classList.remove('show');
-  } else if (img.dataset.type === 'bomb') {
-    endGame(true);
-  }
 }
 
 function startGame() {
@@ -146,15 +119,15 @@ function startGame() {
     }
   }, 1000);
 
-  moleTimer = setInterval(showRandomMole, getDifficultyTimeout());
+  moleTimer = setInterval(showRandomMole, getLevelTimeout());
 }
 
 function resetGame() {
   score = 0;
   level = 1;
-  timeLeft = gameSettings.gameDuration;
+  hits = 0;
+  timeLeft = 60;
   clearTimers();
-  updateLevelProgress();
 }
 
 function clearTimers() {
@@ -167,7 +140,7 @@ function pauseGame() {
   if (gamePaused) {
     gamePaused = false;
     pauseBtn.textContent = '⏸️ Pause';
-    moleTimer = setInterval(showRandomMole, getDifficultyTimeout());
+    moleTimer = setInterval(showRandomMole, getLevelTimeout());
   } else {
     gamePaused = true;
     pauseBtn.textContent = '▶️ Resume';
@@ -175,7 +148,7 @@ function pauseGame() {
   }
 }
 
-function endGame(hitBomb = false) {
+function endGame(hitBomb = false, manualEnd = false) {
   gameRunning = false;
   clearTimers();
 
@@ -183,166 +156,84 @@ function endGame(hitBomb = false) {
 
   saveScore(score);
 
-  let message = hitBomb ? `💥 Kena Bom! Skor: ${score}` : `⏰ Waktu habis! Skor: ${score} | Level: ${level}`;
-  alert(message);
-  showHome();
-}
-
-// ===============================
-// Difficulty & Level Logic
-// ===============================
-// ===============================
-// Difficulty & Level Logic
-// ===============================
-function getDifficultyTimeout() {
-  const base = { easy: 2000, medium: 1500, hard: 1000 }[gameSettings.difficulty] || 1500;
-
-  // Atur pengurangan waktu per level (semakin cepat)
-  let timeout;
-  switch (level) {
-    case 1: timeout = base; break;            // Level 1: normal
-    case 2: timeout = base - 200; break;      // Level 2: lebih cepat
-    case 3: timeout = base - 400; break;      // Level 3: makin cepat
-    case 4: timeout = base - 600; break;      // Level 4: sulit
-    case 5: timeout = base - 800; break;      // Level 5: super cepat
-    default: timeout = Math.max(400, base - 800); // Safety: jangan terlalu cepat
+  let message;
+  if (hitBomb) {
+    message = '💥 Kena Bom!';
+  } else if (manualEnd) {
+    message = '🏁 Permainan Selesai!';
+  } else {
+    message = '⏰ Waktu Habis!';
   }
-  return Math.max(400, timeout); // minimal 400ms biar masih bisa dipukul
+
+  gameOverMessage.innerHTML = message;
+  finalScoreDisplay.textContent = score;
+  finalLevelDisplay.textContent = level;
+  showPage('gameOver');
 }
 
-
-function updateLevelProgress() {
-  let progress = score % 50;
-  let percent = (progress / 50) * 100;
-  document.getElementById('levelProgressBar').style.width = percent + "%";
+function getLevelTimeout() {
+  const timeouts = {
+    1: 2000,
+    2: 1500,
+    3: 1200,
+    4: 1000,
+    5: 800
+  };
+  return timeouts[level] || 2000;
 }
 
-// Leaderboard
 function saveScore(newScore) {
   let scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
-  scores.push({ score: newScore, level, player: gameSettings.playerName, date: new Date().toLocaleDateString(), difficulty: gameSettings.difficulty });
+  scores.push({ score: newScore, level, player: gameSettings.playerName || 'Pemain', date: new Date().toLocaleDateString() });
   scores.sort((a, b) => b.score - a.score);
   scores = scores.slice(0, 10);
   localStorage.setItem('capybaraScores', JSON.stringify(scores));
-
-  let history = JSON.parse(localStorage.getItem('capybaraHistory')) || [];
-  history.unshift({ score: newScore, level, player: gameSettings.playerName, date: new Date().toLocaleString(), difficulty: gameSettings.difficulty });
-  history = history.slice(0, 10);
-  localStorage.setItem('capybaraHistory', JSON.stringify(history));
-
   updatePlayerInfo();
 }
 
 function showLeaderboard() {
   showPage('leaderboard');
-
-  // === Leaderboard (Top 10 Skor Tertinggi) ===
   const scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
   const list = document.getElementById('scoreList');
   list.innerHTML = '';
 
   if (scores.length === 0) {
     list.innerHTML = '<li class="score-item"><span>Belum ada skor</span></li>';
-  } else {
-    scores.forEach((entry, index) => {
-      const li = document.createElement('li');
-      li.className = 'score-item';
-      li.innerHTML = `
-        <span class="rank">#${index + 1}</span>
-        <div>
-          <div><strong>${entry.player}</strong></div>
-          <div>Skor: ${entry.score} | Level: ${entry.level}</div>
-          <div><small>${entry.date} | ${entry.difficulty}</small></div>
-        </div>
-      `;
-      list.appendChild(li);
-    });
+    return;
   }
 
-  // === History (10 Match Terakhir) ===
-  const history = JSON.parse(localStorage.getItem('capybaraHistory')) || [];
-  const historyList = document.getElementById('historyList');
-  historyList.innerHTML = '';
-
-  if (history.length === 0) {
-    historyList.innerHTML = '<li class="score-item"><span>Belum ada riwayat</span></li>';
-  } else {
-    history.forEach((entry, index) => {
-      const li = document.createElement('li');
-      li.className = 'score-item';
-      li.innerHTML = `
-        <span class="rank">${index + 1}</span>
-        <div>
-          <div><strong>${entry.player}</strong></div>
-          <div>Skor: ${entry.score} | Level: ${entry.level}</div>
-          <div><small>${entry.date} | ${entry.difficulty}</small></div>
-        </div>
-      `;
-      historyList.appendChild(li);
-    });
-  }
+  scores.forEach((entry, index) => {
+    const li = document.createElement('li');
+    li.className = 'score-item';
+    li.innerHTML = `
+      <span class="rank">#${index + 1}</span>
+      <div>
+        <div><strong>${entry.player}</strong></div>
+        <div>Skor: ${entry.score} | Level: ${entry.level}</div>
+        <div><small>${entry.date}</small></div>
+      </div>`;
+    list.appendChild(li);
+  });
 }
 
-
-function clearLeaderboardConfirm() {
-  document.getElementById('confirmPopup').classList.add('show');
-}
-function hideConfirmPopup() {
-  document.getElementById('confirmPopup').classList.remove('show');
-}
-function confirmClearLeaderboard() {
-  localStorage.removeItem('capybaraScores');
-  hideConfirmPopup();
-  showLeaderboard();
-  document.getElementById('deleteSuccessPopup').classList.add('show');
-  setTimeout(() => document.getElementById('deleteSuccessPopup').classList.remove('show'), 2000);
-}
-
-// ===============================
-// Settings
 function showSettings() {
   showPage('settings');
-  document.getElementById('playerNameInput').value = gameSettings.playerName;
+  document.getElementById('playerNameInput').value = '';
   document.getElementById('soundSetting').value = gameSettings.soundEnabled ? 'on' : 'off';
-  document.getElementById('durationSetting').value = gameSettings.gameDuration;
   updatePresetSelection();
 }
 
 function saveSettings() {
   gameSettings.playerName = document.getElementById('playerNameInput').value || 'Pemain';
   gameSettings.soundEnabled = document.getElementById('soundSetting').value === 'on';
-  gameSettings.gameDuration = parseInt(document.getElementById('durationSetting').value);
-  localStorage.setItem('capybaraSettings', JSON.stringify(gameSettings));
-  document.getElementById('playerName').textContent = gameSettings.playerName;
-  updatePresetSelection();
   showSuccessPopup();
+  localStorage.setItem('capybaraSettings', JSON.stringify(gameSettings));
+  updatePlayerInfo();
 }
 
 function loadSettings() {
   const saved = JSON.parse(localStorage.getItem('capybaraSettings'));
   if (saved) gameSettings = saved;
-  document.getElementById('playerNameInput').value = gameSettings.playerName;
-  document.getElementById('playerName').textContent = gameSettings.playerName;
-  document.getElementById('soundSetting').value = gameSettings.soundEnabled ? 'on' : 'off';
-  document.getElementById('durationSetting').value = gameSettings.gameDuration;
-  updatePresetSelection();
-}
-
-function resetSettings() {
-  gameSettings = {
-    playerName: 'Pemain',
-    gameDuration: 30,
-    difficulty: 'medium',
-    soundEnabled: true,
-    capybaraImage: 'capybara1'
-  };
-  localStorage.setItem('capybaraSettings', JSON.stringify(gameSettings));
-  document.getElementById('playerNameInput').value = gameSettings.playerName;
-  document.getElementById('playerName').textContent = gameSettings.playerName;
-  document.getElementById('soundSetting').value = 'on';
-  document.getElementById('durationSetting').value = 30;
-  updatePresetSelection();
-  showSuccessPopup();
 }
 
 function updatePresetSelection() {
@@ -357,7 +248,7 @@ function selectPresetImage(key) {
 }
 
 function updatePlayerInfo() {
-  document.getElementById('playerName').textContent = gameSettings.playerName;
+  document.getElementById('playerName').textContent = gameSettings.playerName || 'Pemain';
   const scores = JSON.parse(localStorage.getItem('capybaraScores')) || [];
   document.getElementById('highScore').textContent = scores.length > 0 ? scores[0].score : 0;
 }
@@ -375,21 +266,4 @@ function showSuccessPopup() {
   const popup = document.getElementById('successPopup');
   popup.classList.add('show');
   setTimeout(() => popup.classList.remove('show'), 2000);
-}
-
-function clearLeaderboardConfirm() {
-  document.getElementById('confirmPopup').classList.add('show');
-}
-
-function hideConfirmPopup() {
-  document.getElementById('confirmPopup').classList.remove('show');
-}
-
-function confirmClearLeaderboard() {
-  localStorage.removeItem('capybaraScores');
-  localStorage.removeItem('capybaraHistory');
-  hideConfirmPopup();
-  showLeaderboard();
-  document.getElementById('deleteSuccessPopup').classList.add('show');
-  setTimeout(() => document.getElementById('deleteSuccessPopup').classList.remove('show'), 2000);
 }
