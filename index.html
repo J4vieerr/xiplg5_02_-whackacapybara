@@ -1,1 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Whack a Capybara</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- HOME PAGE -->
+    <div id="home" class="page active">
+      <h1>🐹 Whack a Capybara 🐹</h1>
+      <div class="player-info" id="playerInfo">
+        <div>Selamat datang, <strong id="playerName">Pemain</strong>!</div>
+        <div>Skor Tertinggi: <strong id="highScore">0</strong></div>
+      </div>
+      <button class="btn" onclick="startGame()">🎮 Mulai Main</button>
+      <button class="btn btn-secondary" onclick="showLeaderboard()">🏆 Leaderboard</button>
+      <button class="btn btn-success" onclick="showSettings()">⚙️ Pengaturan</button>
+    </div>
 
+    <!-- GAME AREA -->
+    <div id="game" class="page">
+      <h1>Whack a Capybara</h1>
+      <div id="info">
+        <div class="info-item">Skor: <span id="score">0</span></div>
+        <div class="info-item">Waktu: <span id="time">60</span>s</div>
+        <div class="info-item">Level: <span id="level">1</span></div>
+      </div>
+      <div id="grid"></div>
+      <button class="btn" onclick="pauseGame()" id="pauseBtn">⏸️ Pause</button>
+      <button class="btn btn-secondary" onclick="endGame()">🏁 Selesai</button>
+    </div>
+
+    <!-- GAME OVER PAGE -->
+    <div id="gameOver" class="page">
+      <h1>Game Over!</h1>
+      <div class="game-over-content">
+        <div id="gameOverMessage"></div>
+        <div class="game-over-stats">
+          <div>Skor: <span id="finalScore">0</span></div>
+          <div>Level: <span id="finalLevel">1</span></div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn" onclick="startGame()">🔄 Main Lagi</button>
+          <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali ke Beranda</button>
+          <button class="btn btn-success" onclick="showLeaderboard()">🏆 Lihat Leaderboard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div id="leaderboard" class="page">
+      <h1>🏆 Leaderboard 🏆</h1>
+      <ul class="score-list" id="scoreList"></ul>
+      <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali</button>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="settings" class="page">
+      <h1>⚙️ Pengaturan</h1>
+      <div class="settings-grid">
+        <div class="setting-item">
+          <label class="setting-label">Nama Pemain:</label>
+          <input type="text" class="setting-control" id="playerNameInput" placeholder="Masukkan nama Anda">
+        </div>
+        
+        <div class="setting-item">
+          <label class="setting-label">Pilih Gambar Capybara:</label>
+          <div class="preset-images">
+            <div class="preset-btn active" onclick="selectPresetImage('capybara1')" data-image="capybara1">
+              <img src="bakpao capybara.png" alt="Capybara 1">
+            </div>
+            <div class="preset-btn" onclick="selectPresetImage('capybara2')" data-image="capybara2">
+              <img src="Hi capybara.png" alt="Capybara 2">
+            </div>
+            <div class="preset-btn" onclick="selectPresetImage('capybara3')" data-image="capybara3">
+              <img src="sleep capybara.png" alt="Capybara 3">
+            </div>
+            <div class="preset-btn" onclick="selectPresetImage('capybara4')" data-image="capybara4">
+              <img src="streching capybara.png" alt="Capybara 4">
+            </div>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <label class="setting-label">Suara:</label>
+          <select class="setting-control" id="soundSetting">
+            <option value="on" selected>Hidup</option>
+            <option value="off">Mati</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-success" onclick="saveSettings()">💾 Simpan</button>
+      <button class="btn btn-secondary" onclick="showHome()">🏠 Kembali</button>
+    </div>
+  </div>
+
+  <!-- POPUPS -->
+  <div id="successPopup" class="popup">
+    <div class="popup-content">
+      <div class="popup-icon">✅</div>
+      <div class="popup-message">Pengaturan Tersimpan!</div>
+      <div class="popup-submessage">Data Anda telah berhasil disimpan</div>
+    </div>
+  </div>
+
+  <audio id="hitSound" src="hit.mp3" preload="auto"></audio>
+  <audio id="bombSound" src="bomb.mp3" preload="auto"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
